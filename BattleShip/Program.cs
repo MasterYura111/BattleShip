@@ -7,6 +7,7 @@ internal class BattleShip
     private int mode;
     private string username;
     private int[] create_fleet;
+    private char[,] mapplayer;
     private int[,] mapenemy;
     private char[] horizontal_axis;
     private int x, y;
@@ -14,6 +15,7 @@ internal class BattleShip
     public BattleShip()
     {
         create_fleet = new int[5];
+        mapplayer = new char[10, 10];
         for(int i=0;i<=9;i++)
             for (int j = 0; j <= 9; j++)
                 mapplayer[i, j] = '0';
@@ -96,12 +98,14 @@ internal class BattleShip
         {
             newchar = '1';
             mapplayer[y, x] = newchar;
+            //this.UpdateAdjacentPoints(newchar);
 
         }
         else if (mapplayer[y, x] == '1')
         {
             newchar = '0';
             mapplayer[y, x] = newchar;
+            //this.UpdateAdjacentPoints(newchar);
         }
         else if (mapplayer[y, x] == 'b')
         {
@@ -110,9 +114,54 @@ internal class BattleShip
             
     }
 
+    //public int UpdateAdjacentPoints (char newchar)
+    //{
+    //    int found_x=-5;
+    //    int found_y=-5;
+    //    bool isadjacentpoint = false;
 
+    //    if (newchar == '1')
+    //    {
+    //        for (int i=x-1;i<=x+1;i++)
+    //            for (int j = y - 1; j <= y + 1; j++)
+    //            {
+    //                if (i != x && j != y)
+    //                {
+    //                    if (mapplayer[i, j] == 1)
+    //                    {
+    //                        found_x = i;
+    //                        found_y = j;
+    //                        isadjacentpoint = true;
+    //                    }
+    //                }
+    //            }
+    //        if (isadjacentpoint)
+    //        {
                 
+    //        }
+    //        else if (!isadjacentpoint)  //Lock the corners
+    //        {
+    //            if (y - 1 >= 0)
+    //            {
+    //                if (x + 1 <= 9) 
+    //                    mapplayer[y - 1, x + 1] = 'b';
+    //                if (x - 1 >= 0) 
+    //                    mapplayer[y - 1, x - 1] = 'b';
+    //            }
+    //            if (y + 1 <= 9) 
+    //            {
+    //                if (x + 1 <= 9) 
+    //                    mapplayer[y + 1, x + 1] = 'b';
+    //                if (x - 1 >= 0) 
+    //                    mapplayer[y + 1, x - 1] = 'b';
+    //            }
+    //        }
+    //    }
+    //    else if (newchar == '0')
+    //    {
 
+    //    }
+    //}
     public void ReadCoordinates()
     {
         string readline;
@@ -145,6 +194,7 @@ internal class BattleShip
             wrong = true;
         }
         else
+        {
             if ((readline[0] >= '0' && readline[0] <= '9') &&
                 ((readline[1] >= 'A' && readline[1] <= 'J') || (readline[1] >= 'a' && readline[1] <= 'j')))
             {
@@ -159,6 +209,7 @@ internal class BattleShip
             }
             else
                 wrong = true;
+        }
 
         if (wrong)
         {
@@ -170,6 +221,7 @@ internal class BattleShip
             return false;
 
     }
+    public void  InitMap( char[,] map)
     {
             Console.WriteLine("\t");
             Console.Write(" | ");
@@ -223,6 +275,9 @@ class BattleShipDemo
     public static void Main()
     {
         BattleShip bt=new BattleShip();
+        bt.InitMode();
+        bt.InitUserName();
+        bt.InitCreatFleet();
         bt.InitMapPlayer();
 
     }
