@@ -2,31 +2,25 @@
 using System.Runtime.CompilerServices;
 
 
-internal class BattleShip
+ class BattleShip
 {
-    private int mode;
-    private string[] modename;
-    private string username;
-    private int[] create_fleet;
-    private char[,] mapplayer;
-    private int[,] mapenemy;
-    private char[] horizontal_axis;
-    private int x, y;
+    public int mode;
+    public string[] modename;
+    public int[] create_fleet;
+    public char[] horizontal_axis;
 
+    
     public BattleShip()
-    {
-        create_fleet = new int[5];
-        mapplayer = new char[10, 10];
-        for(int i=0;i<=9;i++)
-            for (int j = 0; j <= 9; j++)
-                mapplayer[i, j] = '0';
-
-        mapenemy = new int[10, 10];
-
+    {   
         horizontal_axis = new[] {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
-        this.InitCreatFleet();
-
+        
         modename = new[] {"", "human vs computer", "human vs human", "computer vs computer"};
+
+        create_fleet = new int[5];
+        create_fleet[1] = 4;
+        create_fleet[2] = 3;
+        create_fleet[3] = 2;
+        create_fleet[4] = 1;
     }
     public void InitMode()
     {
@@ -59,83 +53,23 @@ internal class BattleShip
                     break;
             }
         }
+    }
+   
 
-        //Console.WriteLine("mode:" + mode);
-
-    }
-    public void InitUserName()
+    public string ShowCharMap(char i)
     {
-        Console.WriteLine("What is your name?");
-        username = Console.ReadLine();
-    }
-    public void InitCreatFleet()
-    {
-        create_fleet[1] = 4;
-        create_fleet[2] = 3;
-        create_fleet[3] = 2;
-        create_fleet[4] = 1;
-    }
-    public void ShowMode()
-    {
-        Console.WriteLine("Mode: "+modename[mode]);
-    }
-    public void ShowUserName()
-    {
-        Console.WriteLine("User: " + username);
-    }
-    public void InitMapPlayer()
-    {
-        int first_x;
-        int first_y;
-        int second_x;
-        int second_y;
-        string ansvererror;
-        string text_first = "";
-
-        for (int i=4;i>=1;i--)
+        if (i == '0')
+            return " ";
+        else if (i == '1')
+            return "X";
+        else if (i == 'b')
+            return "b";
+        else
         {
-            for (int j = 1; j <= create_fleet[i]; j++)
-            {
-                Console.Clear();
-                this.ShowMode();
-                this.ShowUserName();
-                Console.WriteLine("step: Create map user");
-                this.InitMap(mapplayer);
-
-                for (;;)
-                {
-                    if (i != 1)
-                        text_first = "first";
-                    else
-                        text_first = "";
-                    Console.WriteLine("enter " + text_first + " point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
-                    this.ReadCoordinates();
-                    
-                    first_x = x;
-                    first_y = y;
-
-                    if (i != 1)
-                    {
-                        Console.WriteLine("enter second point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
-                        this.ReadCoordinates();
-                    }
-
-                    second_x = x;
-                    second_y = y;
-
-                    if (this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out  ansvererror))
-                    {
-                        this.InstalShipTwoPoints(first_x, first_y, second_x, second_y);
-                        this.BlockingAdjacentPoints(first_x, first_y, second_x, second_y);
-                        break;
-                    }
-                    else
-                        Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
-                    
-                }
-            }
+            return "";
         }
     }
+
     public void InitMap(char[,] map)
     {
         Console.WriteLine("\t");
@@ -172,8 +106,95 @@ internal class BattleShip
         Console.ResetColor();
         Console.WriteLine();
     }
-    public void ReadCoordinates()
+    public void ShowMode()
     {
+        Console.WriteLine("Mode: " + modename[mode]);
+    }
+}
+
+class Player : BattleShip
+{
+    private string username;
+    private char[,] mapplayer;
+    private char[,] mapenemy;
+    private int user_id;
+
+    public Player(int u_id)
+    {
+        user_id = u_id;
+        mapplayer = new char[10, 10];
+        for (int i = 0; i <= 9; i++)
+            for (int j = 0; j <= 9; j++)
+                mapplayer[i, j] = '0';
+
+        mapenemy = new char[10, 10];
+
+    }
+    public void InitUserName()
+    {
+        Console.WriteLine("What is your name?");
+        username = Console.ReadLine();
+    }
+    public void ShowUserName()
+    {
+        Console.WriteLine("User: " + username+" ("+user_id+")");
+    }
+    public void InitMapPlayer()
+    {
+        
+        int first_x;
+        int first_y;
+        int second_x;
+        int second_y;
+        string ansvererror;
+        string text_first = "";
+
+        for (int i = 4; i >= 1; i--)
+        {
+            for (int j = 1; j <= this.create_fleet[i]; j++)
+            {
+                Console.Clear();
+                this.ShowMode();
+                this.ShowUserName();
+                Console.WriteLine("step: Create map user");
+                this.InitMap(mapplayer);
+
+                for (; ; )
+                {
+                    if (i != 1)
+                        text_first = "first";
+                    else
+                        text_first = "";
+                    Console.WriteLine("enter " + text_first + " point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+                    this.ReadCoordinates(out first_x,out first_y);
+                    if (i != 1)
+                    {
+                        Console.WriteLine("enter second point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+                        this.ReadCoordinates(out second_x,out second_y);
+                    }
+                    else
+                    {
+                        second_x = first_x;
+                        second_y = first_y;
+                    }
+
+
+                    if (this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out  ansvererror))
+                    {
+                        this.InstalShipTwoPoints(first_x, first_y, second_x, second_y);
+                        this.BlockingAdjacentPoints(first_x, first_y, second_x, second_y);
+                        break;
+                    }
+                    else
+                        Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
+
+                }
+            }
+        }
+    }
+   public void ReadCoordinates(out int x, out int y)
+    {
+        
         string readline;
         for (; ; )
         {
@@ -183,9 +204,46 @@ internal class BattleShip
             if (readline == "exit")
                 Environment.Exit(0);
 
-            if (!this.ParceCoordinates(readline))
+            if (!this.ParceCoordinates(readline, out x, out y))
                 break;
         }
+    }
+    public bool ParceCoordinates(string readline, out int x, out int y)
+    {
+        x = y = -5;
+        bool wrong = false;
+
+        if (readline.Length != 2)
+            wrong = true;
+        else if (String.IsNullOrEmpty(readline))
+        {
+            wrong = true;
+        }
+        else
+        {
+            if ((readline[0] >= '0' && readline[0] <= '9') &&
+                ((readline[1] >= 'A' && readline[1] <= 'J') || (readline[1] >= 'a' && readline[1] <= 'j')))
+            {
+                x = Array.IndexOf(horizontal_axis, Char.ToUpper(readline[1]));
+                y = Convert.ToInt32(readline[0].ToString());
+            }
+            else if ((readline[1] >= '0' && readline[1] <= '9') &&
+                ((readline[0] >= 'A' && readline[0] <= 'J') || (readline[0] >= 'a' && readline[0] <= 'j')))
+            {
+                x = Array.IndexOf(horizontal_axis, Char.ToUpper(readline[0]));
+                y = Convert.ToInt32(readline[1].ToString());
+            }
+            else
+                wrong = true;
+        }
+
+        if (wrong)
+        {
+            Console.WriteLine("Invalid input. Enter  Coordinates from 0A to 9J.\n\tfor exit: exit");
+            return true;
+        }
+        else
+            return false;
     }
     public bool CheckingTwoPoint(int first_x, int first_y, int second_x, int second_y, int length_ship, out string ansvererror)
     {
@@ -258,75 +316,24 @@ internal class BattleShip
     }
     public void BlockingAdjacentPoints(int first_x, int first_y, int second_x, int second_y)
     {
-        for (int i=Math.Min(first_x,second_x)-1;i<=Math.Max(first_x,second_x)+1;i++)
+        for (int i = Math.Min(first_x, second_x) - 1; i <= Math.Max(first_x, second_x) + 1; i++)
             for (int j = Math.Min(first_y, second_y) - 1; j <= Math.Max(first_y, second_y) + 1; j++)
             {
-                if((i>=0 && i<=9) && (j>=0 && j<=9))
-                    if(mapplayer[j,i]!='1')
+                if ((i >= 0 && i <= 9) && (j >= 0 && j <= 9))
+                    if (mapplayer[j, i] != '1')
                         mapplayer[j, i] = 'b';
             }
     }
-    public bool CheckShipPoint(int current_x, int current_y)
-    {
-       
-        if (mapplayer[current_y, current_x] == '0')
-        {
-            mapplayer[current_y, current_x] = '1';
-            return true;
-        }
-        else
-            return false;
-    }
-    public bool ParceCoordinates(string readline)
-    {
-        
-        bool wrong = false;
+}
 
-        if (readline.Length != 2)
-            wrong = true;
-        else if (String.IsNullOrEmpty(readline))
-        {
-            wrong = true;
-        }
-        else
-        {
-            if ((readline[0] >= '0' && readline[0] <= '9') &&
-                ((readline[1] >= 'A' && readline[1] <= 'J') || (readline[1] >= 'a' && readline[1] <= 'j')))
-            {
-                x = Array.IndexOf(horizontal_axis, Char.ToUpper(readline[1]));
-                y = Convert.ToInt32(readline[0].ToString());
-            }
-            else if ((readline[1] >= '0' && readline[1] <= '9') &&
-                ((readline[0] >= 'A' && readline[0] <= 'J') || (readline[0] >= 'a' && readline[0] <= 'j')))
-            {
-                x = Array.IndexOf(horizontal_axis, Char.ToUpper(readline[0]));
-                y = Convert.ToInt32(readline[1].ToString());
-            }
-            else
-                wrong = true;
-        }
+class Computer : BattleShip
+{
+    //private string username;
+    //private string user_id;
+    //private char[,] mapplayer;
+    //private char[,] mapenemy;
 
-        if (wrong)
-        {
-            Console.WriteLine("Invalid input. Enter  Coordinates from 0A to 9J.\n\tfor exit: exit");
-            return true;
-        }
-        else
-            return false;
-    }
-    public string ShowCharMap(char i)
-    {
-        if (i == '0')
-            return " ";
-        else if(i=='1')
-            return "X";
-        else if (i == 'b')
-            return "b";
-        else
-        {
-            return "";
-        }
-    }
+
 }
 
 class BattleShipDemo
@@ -335,8 +342,32 @@ class BattleShipDemo
     {
         BattleShip bt=new BattleShip();
         bt.InitMode();
-        bt.InitUserName();
-        bt.InitMapPlayer();
+
+        if (bt.mode == 1 )
+        {
+            Player pl = new Player(1);
+            pl.InitUserName();
+            pl.InitMapPlayer();
+
+            //create computer
+
+        }
+
+        if (bt.mode == 2)
+        {
+            Player pl = new Player(1);
+            pl.InitUserName();
+            pl.InitMapPlayer();
+
+            Player pl2 = new Player(2);
+            pl2.InitUserName();
+            pl2.InitMapPlayer();
+        }
+
+        if (bt.mode ==3 )
+        {
+            
+        }
     }
 }
 
