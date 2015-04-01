@@ -28,7 +28,6 @@ internal class BattleShip
 
         modename = new[] {"", "human vs computer", "human vs human", "computer vs computer"};
     }
-
     public void InitMode()
     {
         string readline;
@@ -59,22 +58,16 @@ internal class BattleShip
                 else
                     break;
             }
-
-
-
         }
 
         //Console.WriteLine("mode:" + mode);
 
     }
-
     public void InitUserName()
     {
         Console.WriteLine("What is your name?");
         username = Console.ReadLine();
-        //Console.WriteLine("username:" + username);
     }
-
     public void InitCreatFleet()
     {
         create_fleet[1] = 4;
@@ -82,25 +75,15 @@ internal class BattleShip
         create_fleet[3] = 2;
         create_fleet[4] = 1;
     }
-
-    public void InitMapPlayer()
-    {
-        
-            this.InitShipPoint();
-        
-        
-    }
-
     public void ShowMode()
     {
         Console.WriteLine("Mode: "+modename[mode]);
     }
-
     public void ShowUserName()
     {
         Console.WriteLine("User: " + username);
     }
-    public void InitShipPoint()
+    public void InitMapPlayer()
     {
         int first_x;
         int first_y;
@@ -121,7 +104,6 @@ internal class BattleShip
 
                 for (;;)
                 {
-
                     if (i != 1)
                         text_first = "first";
                     else
@@ -140,53 +122,77 @@ internal class BattleShip
 
                     second_x = x;
                     second_y = y;
-                    
 
-                    //check all options
                     if (this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out  ansvererror))
                     {
                         this.InstalShipTwoPoints(first_x, first_y, second_x, second_y);
                         this.BlockingAdjacentPoints(first_x, first_y, second_x, second_y);
                         break;
-
                     }
                     else
-                    {
                         Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
-                    }
+                    
                 }
-                
             }
-            
+        }
+    }
+    public void InitMap(char[,] map)
+    {
+        Console.WriteLine("\t");
+        Console.Write(" | ");
+
+        for (int j = 0; j <= 9; j++)
+        {
+            Console.Write(horizontal_axis[j] + " ");
         }
 
-        
+        Console.WriteLine();
+        Console.WriteLine();
+        for (int i = 0; i <= 9; i++)
+        {
+            if (i % 2 == 0)
+                Console.BackgroundColor = ConsoleColor.DarkCyan;
+            else
+                Console.BackgroundColor = ConsoleColor.DarkGray;
 
-    }
-
-    public void BlockingAdjacentPoints(int first_x, int first_y, int second_x, int second_y)
-    {
-        for (int i=Math.Min(first_x,second_x)-1;i<=Math.Max(first_x,second_x)+1;i++)
-            for (int j = Math.Min(first_y, second_y) - 1; j <= Math.Max(first_y, second_y) + 1; j++)
+            Console.Write(i + "| ");
+            for (int j = 0; j <= 9; j++)
             {
-                if((i>=0 && i<=9) && (j>=0 && j<=9))
-                    if(mapplayer[j,i]!='1')
-                        mapplayer[j, i] = 'b';
+                if (ShowCharMap(map[i, j]).Equals("X"))
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                else
+                    Console.ForegroundColor = ConsoleColor.Gray;
+
+                Console.Write(ShowCharMap(map[i, j]) + " ");
+
+                Console.ForegroundColor = ConsoleColor.Gray;
             }
+            Console.WriteLine();
+        }
+        Console.ResetColor();
+        Console.WriteLine();
     }
-    public void InstalShipTwoPoints(int first_x, int first_y, int second_x, int second_y)
+    public void ReadCoordinates()
     {
-        for(int i=Math.Min(first_x,second_x);i<=Math.Max(first_x,second_x);i++)
-            for (int j = Math.Min(first_y, second_y); j <= Math.Max(first_y, second_y); j++)
-                mapplayer[j, i] = '1';
+        string readline;
+        for (; ; )
+        {
+            readline = Console.ReadLine();
+            if (String.IsNullOrEmpty(readline))
+                readline = "";
+            if (readline == "exit")
+                Environment.Exit(0);
+
+            if (!this.ParceCoordinates(readline))
+                break;
+        }
     }
-    public bool CheckingTwoPoint(int first_x, int first_y, int second_x, int second_y, int length_ship,out string  ansvererror)  //перевірка всіх правил по двом точкам
+    public bool CheckingTwoPoint(int first_x, int first_y, int second_x, int second_y, int length_ship, out string ansvererror)
     {
         ansvererror = "";
         bool one_point = false;
         if (first_x == second_x && first_y == second_y && length_ship == 1)
             one_point = true;
-
 
         if ((first_x != second_x && first_y != second_y) ||
             (first_x == second_x && first_y == second_y && !one_point))
@@ -196,20 +202,20 @@ internal class BattleShip
         }
         else if (first_x == second_x && !one_point)
         {
-            if (Math.Abs(first_y - second_y) != length_ship-1)
+            if (Math.Abs(first_y - second_y) != length_ship - 1)
             {
-                ansvererror = "incorrect length ship: " + (Math.Abs(first_y - second_y)) +"!="+ (length_ship - 1)+"";
+                ansvererror = "incorrect length ship: " + (Math.Abs(first_y - second_y)) + "!=" + (length_ship - 1) + "";
                 return false;
             }
-            
+
             for (int i = Math.Min(first_y, second_y); i <= Math.Max(first_y, second_y); i++)
             {
                 if (mapplayer[i, first_x] != '0')
                 {
-                    ansvererror = "point on the map is not available or blocked point: "+i+","+first_x+"";
+                    ansvererror = "point on the map is not available or blocked point: " + i + "," + first_x + "";
                     return false;
                 }
-                    
+
             }
             return true;
         }
@@ -220,7 +226,7 @@ internal class BattleShip
                 ansvererror = "incorrect length ship: " + (Math.Abs(first_y - second_y)) + "!=" + (length_ship - 1) + "";
                 return false;
             }
-            
+
             for (int i = Math.Min(first_x, second_x); i <= Math.Max(first_x, second_x); i++)
             {
                 if (mapplayer[first_y, i] != '0')
@@ -242,9 +248,24 @@ internal class BattleShip
         }
         else
             return false;
-        
+
     }
-   
+    public void InstalShipTwoPoints(int first_x, int first_y, int second_x, int second_y)
+    {
+        for (int i = Math.Min(first_x, second_x); i <= Math.Max(first_x, second_x); i++)
+            for (int j = Math.Min(first_y, second_y); j <= Math.Max(first_y, second_y); j++)
+                mapplayer[j, i] = '1';
+    }
+    public void BlockingAdjacentPoints(int first_x, int first_y, int second_x, int second_y)
+    {
+        for (int i=Math.Min(first_x,second_x)-1;i<=Math.Max(first_x,second_x)+1;i++)
+            for (int j = Math.Min(first_y, second_y) - 1; j <= Math.Max(first_y, second_y) + 1; j++)
+            {
+                if((i>=0 && i<=9) && (j>=0 && j<=9))
+                    if(mapplayer[j,i]!='1')
+                        mapplayer[j, i] = 'b';
+            }
+    }
     public bool CheckShipPoint(int current_x, int current_y)
     {
        
@@ -253,37 +274,9 @@ internal class BattleShip
             mapplayer[current_y, current_x] = '1';
             return true;
         }
-        else if (mapplayer[current_y, current_x] == '1' || mapplayer[current_y, current_x] == 'b')
-        {
-            return false;
-        }
         else
-        {
             return false;
-        }
-        
-            
     }
-
-   
-    public void ReadCoordinates()
-    {
-        string readline;
-        for (;;)
-        {
-            readline = Console.ReadLine();
-            if (String.IsNullOrEmpty(readline))
-                readline = "";
-            if (readline == "exit")
-                    Environment.Exit(0);
-
-            if(!this.ParceCoordinates(readline))
-                break;
-            
-        }
-    }
-    
-
     public bool ParceCoordinates(string readline)
     {
         
@@ -318,68 +311,23 @@ internal class BattleShip
             Console.WriteLine("Invalid input. Enter  Coordinates from 0A to 9J.\n\tfor exit: exit");
             return true;
         }
-
         else
             return false;
-
     }
-    public void  InitMap( char[,] map)
+    public string ShowCharMap(char i)
     {
-            Console.WriteLine("\t");
-            Console.Write(" | ");
-    
-            for (int j = 0; j <= 9; j++)
-            {
-                Console.Write(horizontal_axis[j]+" ");
-            }
-            
-            Console.WriteLine();
-            Console.WriteLine();
-            for (int i=0; i <= 9; i++)
-            {
-                if (i%2 == 0)
-                    Console.BackgroundColor = ConsoleColor.DarkCyan;
-                else
-                    Console.BackgroundColor = ConsoleColor.DarkGray;
-
-                Console.Write(i+"| ");
-                for(int j=0;j<=9;j++)
-                {
-                    if (ShowCharMap(map[i, j]).Equals("X"))
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                    else
-                        Console.ForegroundColor = ConsoleColor.Gray;
-
-                    Console.Write(ShowCharMap(map[i, j]) + " ");
-
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                }
-                Console.WriteLine();
-            }
-        Console.ResetColor();
-            Console.WriteLine();
-                
-           
-        }
-
-        public string ShowCharMap(char i)
+        if (i == '0')
+            return " ";
+        else if(i=='1')
+            return "X";
+        else if (i == 'b')
+            return "b";
+        else
         {
-            if (i == '0')
-                return " ";
-            else if(i=='1')
-                return "X";
-            else if (i == 'b')
-                return "b";
-            else
-            {
-                return "";
-            }
+            return "";
         }
+    }
 }
-
-
-       
-    
 
 class BattleShipDemo
 {
@@ -389,7 +337,6 @@ class BattleShipDemo
         bt.InitMode();
         bt.InitUserName();
         bt.InitMapPlayer();
-
     }
 }
 
