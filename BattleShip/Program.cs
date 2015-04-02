@@ -270,7 +270,7 @@ class Player:BattleShip
     }
 }
 
-class Humen : Player
+class Humen : IPlayer
 {
     public  Humen(int u_id):base(u_id)
     {
@@ -336,12 +336,15 @@ class Humen : Player
     }
 }
 
-class Computer:Player
+
+class Computer : IPlayer
 {
     private int[] availablepointmapplayer;
     public Computer(int u_id)
         : base(u_id)
     {
+        var pl = new Player();
+
         availablepointmapplayer =new int[100];
         for (int i = 0; i < 100; i++)
             availablepointmapplayer[i] = i;
@@ -512,12 +515,12 @@ class Computer:Player
     }
 }
 
-interface IInterface
+
+
+interface IPlayer
 {
-     
+    void InitMapPlayer();
 }
-
-
 
 
 class BattleShipDemo
