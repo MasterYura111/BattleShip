@@ -46,8 +46,8 @@ using System.Runtime.CompilerServices;
             }
             else
             {
-                mode = Convert.ToInt32(readline);
-                if (mode != 1 && mode != 2 && mode != 3)
+                this.mode = Convert.ToInt32(readline);
+                if (this.mode != 1 && this.mode != 2 && this.mode != 3)
                     Console.WriteLine("Invalid input. Enter  value from 1 to 3.\n\tfor exit: exit ");
                 else
                     break;
@@ -56,13 +56,13 @@ using System.Runtime.CompilerServices;
     }
    
 
-    public string ShowCharMap(char i)
+    public string ShowCharMap(char ch)
     {
-        if (i == '0')
+        if (ch == '0')
             return " ";
-        else if (i == '1')
+        else if (ch == '1')
             return "X";
-        else if (i == 'b')
+        else if (ch == 'b')
             return "b";
         else
         {
@@ -108,16 +108,16 @@ using System.Runtime.CompilerServices;
     }
     public void ShowMode()
     {
-        Console.WriteLine("Mode: " + modename[mode]);
+        Console.WriteLine("Mode: " + modename[mode]+"mode: "+mode);
     }
 }
 
-class Player : BattleShip
+class Player:BattleShip
 {
-    private string username;
-    private char[,] mapplayer;
-    private char[,] mapenemy;
-    private int user_id;
+    public string username;
+    public char[,] mapplayer;
+    public char[,] mapenemy;
+    public int user_id;
 
     public Player(int u_id)
     {
@@ -130,68 +130,12 @@ class Player : BattleShip
         mapenemy = new char[10, 10];
 
     }
-    public void InitUserName()
-    {
-        Console.WriteLine("What is your name?");
-        username = Console.ReadLine();
-    }
+   
     public void ShowUserName()
     {
         Console.WriteLine("User: " + username+" ("+user_id+")");
     }
-    public void InitMapPlayer()
-    {
-        
-        int first_x;
-        int first_y;
-        int second_x;
-        int second_y;
-        string ansvererror;
-        string text_first = "";
-
-        for (int i = 4; i >= 1; i--)
-        {
-            for (int j = 1; j <= this.create_fleet[i]; j++)
-            {
-                Console.Clear();
-                this.ShowMode();
-                this.ShowUserName();
-                Console.WriteLine("step: Create map user");
-                this.InitMap(mapplayer);
-
-                for (; ; )
-                {
-                    if (i != 1)
-                        text_first = "first";
-                    else
-                        text_first = "";
-                    Console.WriteLine("enter " + text_first + " point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
-                    this.ReadCoordinates(out first_x,out first_y);
-                    if (i != 1)
-                    {
-                        Console.WriteLine("enter second point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
-                        this.ReadCoordinates(out second_x,out second_y);
-                    }
-                    else
-                    {
-                        second_x = first_x;
-                        second_y = first_y;
-                    }
-
-
-                    if (this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out  ansvererror))
-                    {
-                        this.InstalShipTwoPoints(first_x, first_y, second_x, second_y);
-                        this.BlockingAdjacentPoints(first_x, first_y, second_x, second_y);
-                        break;
-                    }
-                    else
-                        Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
-
-                }
-            }
-        }
-    }
+    
    public void ReadCoordinates(out int x, out int y)
     {
         
@@ -326,15 +270,255 @@ class Player : BattleShip
     }
 }
 
-class Computer : BattleShip
+class Humen : Player
 {
-    //private string username;
-    //private string user_id;
-    //private char[,] mapplayer;
-    //private char[,] mapenemy;
+    public  Humen(int u_id):base(u_id)
+    {
+        this.InitUserName();
+    }
+    public void InitUserName()
+    {
+        Console.WriteLine("What is your name? (Player №" + user_id + ")");
+        username = Console.ReadLine();
+    }
+    public void InitMapPlayer()
+    {
+
+        int first_x;
+        int first_y;
+        int second_x;
+        int second_y;
+        string ansvererror;
+        string text_first = "";
+
+        for (int i = 4; i >= 1; i--)    
+        {
+            for (int j = 1; j <= this.create_fleet[i]; j++)
+            {
+                Console.Clear();
+                this.ShowMode();
+                this.ShowUserName();
+                Console.WriteLine("step: Create map user");
+                this.InitMap(mapplayer);
+
+                for (; ; )
+                {
+                    if (i != 1)
+                        text_first = "first";
+                    else
+                        text_first = "";
+                    Console.WriteLine("enter " + text_first + " point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+                    this.ReadCoordinates(out first_x, out first_y);
+                    if (i != 1)
+                    {
+                        Console.WriteLine("enter second point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+                        this.ReadCoordinates(out second_x, out second_y);
+                    }
+                    else
+                    {
+                        second_x = first_x;
+                        second_y = first_y;
+                    }
 
 
+                    if (this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out  ansvererror))
+                    {
+                        this.InstalShipTwoPoints(first_x, first_y, second_x, second_y);
+                        this.BlockingAdjacentPoints(first_x, first_y, second_x, second_y);
+                        break;
+                    }
+                    else
+                        Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
+
+                }
+            }
+        }
+    }
 }
+
+class Computer:Player
+{
+    private int[] availablepointmapplayer;
+    public Computer(int u_id)
+        : base(u_id)
+    {
+        availablepointmapplayer =new int[100];
+        for (int i = 0; i < 100; i++)
+            availablepointmapplayer[i] = i;
+
+        this.InitUserName();
+    }
+    public void InitUserName()
+    {
+        username = "Computer";
+    }
+
+    public void InitMapPlayer()
+    {
+
+        int first_x;
+        int first_y;
+        int second_x;
+        int second_y;
+        string ansvererror;
+        string text_first = "";
+        
+
+        for (int i = 4; i >= 1; i--)
+        {
+            for (int j = 1; j <= this.create_fleet[i]+1; j++)
+            {
+                Console.Clear();
+                this.ShowMode();
+                this.ShowUserName();
+                Console.WriteLine("step: Create map user");
+                this.InitMap(mapplayer);
+                if (j <= create_fleet[i])
+                    for (; ; )
+                    {
+                        if (i != 1)
+                            text_first = "first";
+                        else
+                            text_first = "";
+                        Console.WriteLine("enter " + text_first + " point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+
+                        //random point
+                        this.RandomPoints(out first_x, out first_y);
+
+                        Console.WriteLine("random point: " + this.horizontal_axis[first_x] + first_y);
+                        System.Threading.Thread.Sleep(1000);
+                        if (i != 1)
+                        {
+                            Console.WriteLine("enter second point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+                        
+                            if(!this.RandomSecondPoint(first_x, first_y, i,out second_x,out second_y))
+                                Console.WriteLine("Error second point");
+
+                            Console.WriteLine("random point: " + this.horizontal_axis[second_x] + second_y);
+
+                            System.Threading.Thread.Sleep(1000);
+                        }
+                        else
+                        {
+                            second_x = first_x;
+                            second_y = first_y;
+                        }
+
+
+                        if (this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out  ansvererror))
+                        {
+                            this.InstalShipTwoPoints(first_x, first_y, second_x, second_y);
+                            this.BlockingAdjacentPoints(first_x, first_y, second_x, second_y);
+                            this.UpdateAvailablePoint();
+                            break;
+                        }
+                        else
+                            Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
+
+                    }
+            }
+        }
+    }
+
+    private void UpdateAvailablePoint()
+    {
+        availablepointmapplayer = new int[0];
+
+        for (int i = 0; i <= 9; i++)
+            for (int j = 0; j <= 9; j++)
+            {
+                if (this.mapplayer[j, i] == '0')
+                {
+                    Array.Resize(ref this.availablepointmapplayer, this.availablepointmapplayer.Length + 1);
+                    
+                    string str_i = i.ToString();
+                    string str_j = j.ToString();
+                    string new_str_i_j = str_j + str_i;
+                    int new_yx = Convert.ToInt32(new_str_i_j);
+
+                    this.availablepointmapplayer[this.availablepointmapplayer.Length - 1] = new_yx;
+                }
+                    
+            }
+    }
+    private bool RandomSecondPoint(int first_x, int first_y, int length_ship, out int x, out int y)
+    {
+        int random;
+        x = y = -5;
+        //PossibleCoordinatesSecondPoint
+        int[][] PossiblePoints=new int[0][];
+        length_ship--;
+        if (first_x - length_ship >=0)
+        {
+            if (this.mapplayer[first_y, first_x - length_ship] == '0')
+            {
+                Array.Resize(ref PossiblePoints, PossiblePoints.Length+1);
+                PossiblePoints[PossiblePoints.Length - 1] = new int[] { first_y, first_x - length_ship };
+            }
+        }
+        if (first_x + length_ship <=9)
+        {
+            if (this.mapplayer[first_y, first_x + length_ship] == '0')
+            {
+                Array.Resize(ref PossiblePoints, PossiblePoints.Length + 1);
+                PossiblePoints[PossiblePoints.Length - 1] = new int[] { first_y, first_x + length_ship };
+            }
+        }
+        if (first_y - length_ship >= 0)
+        {
+            if (this.mapplayer[first_y-length_ship, first_x] == '0')
+            {
+                Array.Resize(ref PossiblePoints, PossiblePoints.Length + 1);
+                PossiblePoints[PossiblePoints.Length - 1] = new int[] { first_y - length_ship, first_x };
+            }
+        }
+        if (first_y + length_ship <=9)
+        {
+            if (this.mapplayer[first_y + length_ship, first_x] == '0')
+            {
+                Array.Resize(ref PossiblePoints, PossiblePoints.Length + 1);
+                PossiblePoints[PossiblePoints.Length - 1] = new int[] { first_y + length_ship, first_x };
+            }
+        }
+
+        if (PossiblePoints.Length > 0)
+        {
+            Random rnd = new Random();
+            random = rnd.Next(PossiblePoints.Length);
+            y = PossiblePoints[random][0];
+            x = PossiblePoints[random][1];
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
+    public bool RandomPoints(out int x, out int y)
+    {
+        int random;
+        string randomcoordinates;
+
+        Random rnd = new Random();
+        random = rnd.Next(availablepointmapplayer.Length);
+        randomcoordinates = availablepointmapplayer[random].ToString("D2");
+        y = Convert.ToInt32(randomcoordinates[0].ToString());
+        x = Convert.ToInt32(randomcoordinates[1].ToString());
+        return true;
+
+    }
+}
+
+interface IInterface
+{
+     
+}
+
+
+
 
 class BattleShipDemo
 {
@@ -343,30 +527,34 @@ class BattleShipDemo
         BattleShip bt=new BattleShip();
         bt.InitMode();
 
-        if (bt.mode == 1 )
+        
+
+        if (bt.mode == 1)
         {
-            Player pl = new Player(1);
-            pl.InitUserName();
-            pl.InitMapPlayer();
+            var hm = new Humen(1);
+            hm.InitMapPlayer();
 
             //create computer
-
+            var cp = new Computer(2);
+            cp.InitMapPlayer();
         }
 
         if (bt.mode == 2)
         {
-            Player pl = new Player(1);
-            pl.InitUserName();
-            pl.InitMapPlayer();
+            var hm = new Humen(1);
+            hm.InitMapPlayer();
 
-            Player pl2 = new Player(2);
-            pl2.InitUserName();
-            pl2.InitMapPlayer();
+            var hm2 = new Humen(2);
+            hm2.InitMapPlayer();
         }
 
-        if (bt.mode ==3 )
+        if (bt.mode == 3)
         {
-            
+            var cp = new Computer(1);
+            cp.InitMapPlayer();
+
+            var cp2 = new Computer(2);
+            cp2.InitMapPlayer();
         }
     }
 }
