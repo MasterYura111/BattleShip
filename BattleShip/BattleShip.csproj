@@ -41,7 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="BattleShip.cs" />
+    <Compile Include="Computer.cs" />
+    <Compile Include="Humen.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="MainBattleShip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
