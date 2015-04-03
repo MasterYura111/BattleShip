@@ -3,10 +3,11 @@
 class Player : BattleShip
 {
     protected string username;
-    protected char[,] mapplayer;
-    protected char[,] mapenemy;
-    protected int user_id;
+    public char[,] mapplayer;
+    public int?[][][] EmenyPointShip;
 
+    protected int user_id;
+    private int[] availablepointmapplayer;
     public Player(int u_id)
     {
         user_id = u_id;
@@ -15,11 +16,13 @@ class Player : BattleShip
             for (int j = 0; j <= 9; j++)
                 mapplayer[i, j] = '0';
 
-        mapenemy = new char[10, 10];
+        availablepointmapplayer = new int[100];
+        for (int i = 0; i < 100; i++)
+            availablepointmapplayer[i] = i;
 
     }
 
-    protected void ShowUserName()
+    public void ShowUserName()
     {
         Console.WriteLine("User: " + username + " (" + user_id + ")");
     }
@@ -156,4 +159,547 @@ class Player : BattleShip
                         mapplayer[j, i] = 'b';
             }
     }
+
+    protected void InitMap(int UserOrComputer)
+    {
+        int first_x;
+        int first_y;
+        int second_x;
+        int second_y;
+        string ansvererror;
+        string text_first = "";
+
+        for (int i = 4; i >= 1; i--)
+        {
+            for (int j = 1; j <= this.create_fleet[i]; j++)
+            {
+                Console.Clear();
+                this.ShowMode();
+                this.ShowUserName();
+                Console.WriteLine("step: Create map user");
+                this.DisplayMap(mapplayer,1);
+
+                for (; ; )
+                {
+                    if (i != 1)
+                        text_first = "first";
+                    else
+                        text_first = "";
+                    Console.WriteLine("enter " + text_first + " point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+
+                    this.CreateFirstPointInitMap(UserOrComputer, out first_x, out first_y);
+
+                    if (i != 1)
+                    {
+                        Console.WriteLine("enter second point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+                        this.CreateSecondPointInitMap(UserOrComputer,first_x,first_y,i, out second_x, out second_y);
+                        
+                    }
+                    else
+                    {
+                        second_x = first_x;
+                        second_y = first_y;
+                    }
+
+
+                    if (this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out  ansvererror))
+                    {
+                        this.InstalShipTwoPoints(first_x, first_y, second_x, second_y);
+                        this.BlockingAdjacentPoints(first_x, first_y, second_x, second_y);
+                        if(UserOrComputer==2)
+                            this.UpdateAvailablePoint();
+                        break;
+                    }
+                    else
+                        Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
+
+                }
+            }
+        }
+    }
+
+    protected void CreateFirstPointInitMap(int UserOrComputer, out int first_x, out int first_y)
+    {
+        first_x = -5;
+        first_y = -5;
+        if (UserOrComputer == 1)
+        {
+            this.ReadCoordinates(out first_x, out first_y);
+        }
+        else if (UserOrComputer == 2)
+        {
+            this.RandomPoints(out first_x, out first_y);
+            Console.WriteLine("random point: " + this.horizontal_axis[first_x] + first_y);
+            System.Threading.Thread.Sleep(10);
+        }
+    }
+
+    protected void CreateSecondPointInitMap(int UserOrComputer,int first_x,int first_y, int length_ship,out int second_x, out int second_y)
+    {
+        second_x = -5;
+        second_y = -5;
+        if (UserOrComputer == 1)
+        {
+            this.ReadCoordinates(out second_x, out second_y);
+        }
+        else if (UserOrComputer == 2)
+        {
+            this.RandomSecondPoint(first_x, first_y, length_ship, out second_x, out second_y);
+            Console.WriteLine("random point: " + this.horizontal_axis[second_x] + second_y);
+            System.Threading.Thread.Sleep(10);
+        }
+    }
+
+    private bool RandomPoints(out int x, out int y)
+    {
+        int random;
+        string randomcoordinates;
+
+        Random rnd = new Random();
+        random = rnd.Next(availablepointmapplayer.Length);
+        randomcoordinates = availablepointmapplayer[random].ToString("D2");
+        y = Convert.ToInt32(randomcoordinates[0].ToString());
+        x = Convert.ToInt32(randomcoordinates[1].ToString());
+        return true;
+
+    }
+    private bool RandomSecondPoint(int first_x, int first_y, int length_ship, out int x, out int y)
+    {
+        int random;
+        x = y = -5;
+        //PossibleCoordinatesSecondPoint
+        int[][] PossiblePoints = new int[0][];
+        length_ship--;
+        if (first_x - length_ship >= 0)
+        {
+            if (this.mapplayer[first_y, first_x - length_ship] == '0')
+            {
+                Array.Resize(ref PossiblePoints, PossiblePoints.Length + 1);
+                PossiblePoints[PossiblePoints.Length - 1] = new int[] { first_y, first_x - length_ship };
+            }
+        }
+        if (first_x + length_ship <= 9)
+        {
+            if (this.mapplayer[first_y, first_x + length_ship] == '0')
+            {
+                Array.Resize(ref PossiblePoints, PossiblePoints.Length + 1);
+                PossiblePoints[PossiblePoints.Length - 1] = new int[] { first_y, first_x + length_ship };
+            }
+        }
+        if (first_y - length_ship >= 0)
+        {
+            if (this.mapplayer[first_y - length_ship, first_x] == '0')
+            {
+                Array.Resize(ref PossiblePoints, PossiblePoints.Length + 1);
+                PossiblePoints[PossiblePoints.Length - 1] = new int[] { first_y - length_ship, first_x };
+            }
+        }
+        if (first_y + length_ship <= 9)
+        {
+            if (this.mapplayer[first_y + length_ship, first_x] == '0')
+            {
+                Array.Resize(ref PossiblePoints, PossiblePoints.Length + 1);
+                PossiblePoints[PossiblePoints.Length - 1] = new int[] { first_y + length_ship, first_x };
+            }
+        }
+
+        if (PossiblePoints.Length > 0)
+        {
+            Random rnd = new Random();
+            random = rnd.Next(PossiblePoints.Length);
+            y = PossiblePoints[random][0];
+            x = PossiblePoints[random][1];
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    private void UpdateAvailablePoint()
+    {
+        availablepointmapplayer = new int[0];
+
+        for (int i = 0; i <= 9; i++)
+            for (int j = 0; j <= 9; j++)
+            {
+                if (this.mapplayer[j, i] == '0')
+                {
+                    Array.Resize(ref this.availablepointmapplayer, this.availablepointmapplayer.Length + 1);
+
+                    string str_i = i.ToString();
+                    string str_j = j.ToString();
+                    string new_str_i_j = str_j + str_i;
+                    int new_yx = Convert.ToInt32(new_str_i_j);
+
+                    this.availablepointmapplayer[this.availablepointmapplayer.Length - 1] = new_yx;
+                }
+
+            }
+    }
+
+
+    public bool InitPlayerShootToEnemy(Player pl, Player pl_enemy, out char MissWoundedKilled)
+    {
+        bool IsHumen = false;
+        if (pl is Humen)
+            IsHumen = true;
+
+        Console.WriteLine("IsHumen: " + IsHumen);
+        int x, y;
+        bool? res;
+        Console.WriteLine("enter point coordinates shoot to enemy");
+        for (;;)
+        {
+            if(IsHumen)
+                this.ReadCoordinates(out x, out y);
+            else
+            {
+                this.RandomPointsToShootEnemy(out x, out y,pl,pl_enemy);
+                Console.WriteLine("Random point: "+y+this.horizontal_axis[x]);
+                System.Threading.Thread.Sleep(100);
+            }
+            res = this.PlayerShootToEnemy(x, y, pl_enemy, out MissWoundedKilled);
+            if (!IsHumen)
+            {
+                //mind computer shoot
+                this.MindCmputerShoot(x, y,pl, MissWoundedKilled);
+            }
+            
+
+            if(res!=null)
+                break;
+            else
+                Console.WriteLine("wrong coordinates. Point already shoot. Try again\n\tfor exit: exit");
+        }
+        if (res == true)
+            return true;
+        else
+        {
+            return false;
+        }
+
+    }
+
+    private void MindCmputerShoot(int x, int y,Player pl, char MissWoundedKilled)
+    {
+        if (pl.EmenyPointShip == null && MissWoundedKilled!='w')
+        {
+            EmenyPointShip=new int?[4][][];
+            for (int i = 0; i <= 3; i++)
+            {
+                EmenyPointShip[i]=new int?[3][];
+                for (int j = 0; j <= 2; j++)
+                    EmenyPointShip[i][j] = null;
+            }
+
+
+            //create new EmenyPointShip
+            int IndexArr = 0;
+            int IndexTwoArr = 0;
+            bool HaveFor = false;
+            for (int i = x+1; i <= x + 3; i++)
+            {
+                if (i > 9)
+                    break;
+
+                EmenyPointShip[IndexArr][IndexTwoArr] = new int?[]{ y, i };
+                IndexTwoArr++;
+                HaveFor = true;
+            }
+            if (HaveFor)
+                IndexArr++;
+
+
+            HaveFor = false;
+            IndexTwoArr = 0;
+            for (int i = x-1; i >= x - 3; i--)
+            {
+                if (i < 0) 
+                    break;
+
+                EmenyPointShip[IndexArr][IndexTwoArr] = new int?[] { y, i };
+                IndexTwoArr++;
+                HaveFor = true;
+            }
+            if (HaveFor)
+                IndexArr++;
+
+            HaveFor = false;
+            IndexTwoArr = 0;
+            for (int i = y+1; i <= y+ 3; i++)
+            {
+                if (i >9)
+                    break;
+
+                EmenyPointShip[IndexArr][IndexTwoArr] = new int?[] { i, x };
+                IndexTwoArr++;
+                HaveFor = true;
+            }
+            if (HaveFor)
+                IndexArr++;
+
+
+            HaveFor = false;
+            IndexTwoArr = 0;
+            for (int i = y-1; i >= y - 3; i--)
+            {
+                if (i < 0)
+                    break;
+
+                EmenyPointShip[IndexArr][IndexTwoArr] = new int?[] { i, x };
+                IndexTwoArr++;
+                HaveFor = true;
+            }
+        }
+        else if (MissWoundedKilled == 'k')
+        {
+            int?[][][] EmenyPointShip;
+        }
+        else if (pl.EmenyPointShip != null && (MissWoundedKilled != 'w' || MissWoundedKilled=='m'))
+        {
+            if (MissWoundedKilled == 'w')
+            {
+                
+            }
+            if (MissWoundedKilled == 'm')
+            {
+
+            }
+        }
+
+            
+    }
+
+    private void RandomPointsToShootEnemy(out int x, out int y,Player pl, Player pl_enemy)
+    {
+        x = -5;
+        y = -5;
+        if (pl.EmenyPointShip == null)
+        {
+            int[][] availablepointmapplayer;
+            availablepointmapplayer = this.AvailablePointToShootEnemy(pl_enemy);
+
+
+            int[] point;
+            int random;
+            Random rnd = new Random();
+            random = rnd.Next(availablepointmapplayer.Length);
+            point = availablepointmapplayer[random];
+            y = point[0];
+            x = point[1];
+        }
+        else if (pl.EmenyPointShip != null)
+        {
+            int random;
+            int?[][] ArrPoint;
+            Random rnd = new Random();
+
+            random = rnd.Next(pl.EmenyPointShip.GetLength(0));
+            ArrPoint = pl.EmenyPointShip[random];
+            x =(int) ArrPoint[0][1];
+            y = (int) ArrPoint[0][0];
+        }
+       
+        
+    }
+    private int[][] AvailablePointToShootEnemy(Player pl_enemy)
+    {
+       int[][] availablepointmapplayer=new int[0][];;
+
+        for (int i = 0; i <= 9; i++)
+            for (int j = 0; j <= 9; j++)
+            {
+                if (pl_enemy.mapplayer[j, i] != 'm' &&
+                    pl_enemy.mapplayer[j, i] != 'k' &&
+                    pl_enemy.mapplayer[j, i] != 'e' )
+                {
+                    Array.Resize(ref availablepointmapplayer, availablepointmapplayer.Length + 1);
+                    availablepointmapplayer[availablepointmapplayer.Length - 1] = new int[] { j, i };
+                }
+
+            }
+        return availablepointmapplayer;
+    }
+
+
+    public bool? PlayerShootToEnemy(int x, int y, Player pl_enemy, out char MissWoundedKilled)
+    {
+        MissWoundedKilled = '0';
+        int[][] NeighboringPoints;
+        int Neighboring_x,
+            Neighboring_y;
+        int variable=0;
+        bool? MarkSetEmpty =null;
+        int[] pointCoord;
+        bool? EventPlus = null;
+
+        int[][] NeighboringPoinsSetEmpty=new int[0][];;
+
+        if (pl_enemy.mapplayer[y, x] == '0' || pl_enemy.mapplayer[y, x] == 'b')
+        {
+            pl_enemy.mapplayer[y, x] = 'm';
+            MissWoundedKilled = 'm';
+            return false;
+        }
+        else if (pl_enemy.mapplayer[y, x] == '1')
+        {
+            pl_enemy.mapplayer[y, x] = 'k';
+            MissWoundedKilled = 'w';
+            //cheked kill one ship? if yes when circle point set empty (if they 0,b)
+            if (!this.CheckCharNeighboringPoints(x, y, '1', pl_enemy, out NeighboringPoints))
+            {
+                if (this.CheckCharNeighboringPoints(x, y, 'k', pl_enemy, out NeighboringPoints))
+                {
+                    Array.Resize(ref NeighboringPoinsSetEmpty, NeighboringPoinsSetEmpty.Length + 1);
+                    NeighboringPoinsSetEmpty[NeighboringPoinsSetEmpty.Length - 1] = new int[] {y, x};
+
+                    foreach (var point in NeighboringPoints)
+                    {
+                        if (MarkSetEmpty == false)
+                            break;
+
+                        Neighboring_x = point[1];
+                        Neighboring_y = point[0];
+
+                        pointCoord = new int[2];
+                        if (x != Neighboring_x)
+                        {
+                            variable = Neighboring_x;
+                            pointCoord = new[] {y, variable};
+                            if (Neighboring_x > x)
+                                EventPlus = true;
+                            else if (Neighboring_x < x)
+                                EventPlus = false;
+                        }
+                        if (y != Neighboring_y)
+                        {
+                            variable = Neighboring_y;
+                            pointCoord = new[] {variable, x};
+                            if (Neighboring_y > y)
+                                EventPlus = true;
+                            else if (Neighboring_y < y)
+                                EventPlus = false;
+                        }
+
+
+                        for (;;)
+                        {
+                            if (variable > 9 || variable < 0)
+                            {
+                                MarkSetEmpty = true;
+                                break;
+                            }
+
+
+                            if (pl_enemy.mapplayer[pointCoord[0], pointCoord[1]] == 'k')
+                            {
+                                Array.Resize(ref NeighboringPoinsSetEmpty, NeighboringPoinsSetEmpty.Length + 1);
+                                NeighboringPoinsSetEmpty[NeighboringPoinsSetEmpty.Length - 1] = new int[]
+                                {pointCoord[0], pointCoord[1]};
+                            }
+
+                            if (pl_enemy.mapplayer[pointCoord[0], pointCoord[1]] == '1')
+                            {
+                                MarkSetEmpty = false;
+                                break;
+                            }
+                            else if (pl_enemy.mapplayer[pointCoord[0], pointCoord[1]] != '1' &&
+                                     pl_enemy.mapplayer[pointCoord[0], pointCoord[1]] != 'k')
+                            {
+                                MarkSetEmpty = true;
+                                break;
+                            }
+
+                            if (EventPlus == true)
+                                variable++;
+                            else if (EventPlus == false)
+                                variable--;
+
+                            if (x != Neighboring_x)
+                                pointCoord = new[] {y, variable};
+                            else if (y != Neighboring_y)
+                                pointCoord = new[] {variable, x};
+
+                        }
+                    }
+
+                    if (MarkSetEmpty == true)
+                    {
+                        MissWoundedKilled = 'k';
+                        foreach (var  point in NeighboringPoinsSetEmpty)
+                        {
+                            this.SetEmptyCharNeighboringPoints(point[1], point[0], pl_enemy);
+                        }
+                    }
+                    return true;
+                }
+                else
+                {
+                    this.SetEmptyCharNeighboringPoints(x, y, pl_enemy);
+                }
+            }
+            return true;
+        }
+        else
+            return null;
+       
+    }
+
+    private void SetEmptyCharNeighboringPoints(int x, int y, Player pl_enemy)
+    {
+        for (int i =x - 1; i <= x + 1; i++)
+            for (int j = y - 1; j <= y + 1; j++)
+            {
+                if ((i >= 0 && i <= 9) && (j >= 0 && j <= 9))
+                    if (pl_enemy.mapplayer[j, i] == '0' || pl_enemy.mapplayer[j, i] == 'b')
+                        pl_enemy.mapplayer[j, i] = 'e';
+            }
+    }
+    private bool CheckCharNeighboringPoints(int x, int y, char ch, Player pl_enemy, out int[][] NeighboringPoints)
+    {
+         NeighboringPoints = new int[0][];
+
+        bool mark_have = false;
+        if (x - 1 >= 0)
+        {
+            if (pl_enemy.mapplayer[y, x - 1] == ch)
+            {
+                Array.Resize(ref NeighboringPoints, NeighboringPoints.Length + 1);
+                NeighboringPoints[NeighboringPoints.Length - 1] = new int[] { y, x-1 };
+            }
+        }
+        if (x + 1 <= 9)
+        {
+            if (pl_enemy.mapplayer[y, x + 1] == ch)
+            {
+                Array.Resize(ref NeighboringPoints, NeighboringPoints.Length + 1);
+                NeighboringPoints[NeighboringPoints.Length - 1] = new int[] { y, x + 1 };
+            }
+        }
+        if (y - 1 >= 0)
+        {
+            if (pl_enemy.mapplayer[y-1,x] == ch)
+            {
+                Array.Resize(ref NeighboringPoints, NeighboringPoints.Length + 1);
+                NeighboringPoints[NeighboringPoints.Length - 1] = new int[] { y-1, x};
+            }
+        }
+        if (y + 1 <= 9)
+        {
+            if (pl_enemy.mapplayer[y+1, x] == ch)
+            {
+                Array.Resize(ref NeighboringPoints, NeighboringPoints.Length + 1);
+                NeighboringPoints[NeighboringPoints.Length - 1] = new int[] { y + 1, x };
+            }
+        }
+
+        if (NeighboringPoints.Length > 0)
+            mark_have = true;
+
+        return mark_have;
+    }
+    
 }
