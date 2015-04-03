@@ -4,8 +4,11 @@ class Player : BattleShip
 {
     protected string username;
     public char[,] mapplayer;
-    public int?[][][] EmenyPointShip;
 
+    public int?[] RandomWay;
+    public bool IsNullRandomWay=true;
+    public int[] LastShootPoint;
+    public int LastShootWay;
     protected int user_id;
     private int[] availablepointmapplayer;
     public Player(int u_id)
@@ -359,7 +362,7 @@ class Player : BattleShip
             {
                 this.RandomPointsToShootEnemy(out x, out y,pl,pl_enemy);
                 Console.WriteLine("Random point: "+y+this.horizontal_axis[x]);
-                System.Threading.Thread.Sleep(100);
+                System.Threading.Thread.Sleep(1000);
             }
             res = this.PlayerShootToEnemy(x, y, pl_enemy, out MissWoundedKilled);
             if (!IsHumen)
@@ -385,88 +388,58 @@ class Player : BattleShip
 
     private void MindCmputerShoot(int x, int y,Player pl, char MissWoundedKilled)
     {
-        if (pl.EmenyPointShip == null && MissWoundedKilled!='w')
+
+        if (pl.IsNullRandomWay == true && (MissWoundedKilled == 'k' || MissWoundedKilled == 'w'))
         {
-            EmenyPointShip=new int?[4][][];
-            for (int i = 0; i <= 3; i++)
-            {
-                EmenyPointShip[i]=new int?[3][];
-                for (int j = 0; j <= 2; j++)
-                    EmenyPointShip[i][j] = null;
-            }
+            pl.RandomWay = new int?[] {1, 1, 1, 1};
+            pl.LastShootPoint = new[] { y, x };
+            pl.IsNullRandomWay = false;
 
-
-            //create new EmenyPointShip
-            int IndexArr = 0;
-            int IndexTwoArr = 0;
-            bool HaveFor = false;
-            for (int i = x+1; i <= x + 3; i++)
-            {
-                if (i > 9)
-                    break;
-
-                EmenyPointShip[IndexArr][IndexTwoArr] = new int?[]{ y, i };
-                IndexTwoArr++;
-                HaveFor = true;
-            }
-            if (HaveFor)
-                IndexArr++;
-
-
-            HaveFor = false;
-            IndexTwoArr = 0;
-            for (int i = x-1; i >= x - 3; i--)
-            {
-                if (i < 0) 
-                    break;
-
-                EmenyPointShip[IndexArr][IndexTwoArr] = new int?[] { y, i };
-                IndexTwoArr++;
-                HaveFor = true;
-            }
-            if (HaveFor)
-                IndexArr++;
-
-            HaveFor = false;
-            IndexTwoArr = 0;
-            for (int i = y+1; i <= y+ 3; i++)
-            {
-                if (i >9)
-                    break;
-
-                EmenyPointShip[IndexArr][IndexTwoArr] = new int?[] { i, x };
-                IndexTwoArr++;
-                HaveFor = true;
-            }
-            if (HaveFor)
-                IndexArr++;
-
-
-            HaveFor = false;
-            IndexTwoArr = 0;
-            for (int i = y-1; i >= y - 3; i--)
-            {
-                if (i < 0)
-                    break;
-
-                EmenyPointShip[IndexArr][IndexTwoArr] = new int?[] { i, x };
-                IndexTwoArr++;
-                HaveFor = true;
-            }
         }
         else if (MissWoundedKilled == 'k')
         {
-            int?[][][] EmenyPointShip;
+            pl.RandomWay = null;
+            pl.IsNullRandomWay = true;
         }
-        else if (pl.EmenyPointShip != null && (MissWoundedKilled != 'w' || MissWoundedKilled=='m'))
+        else if (pl.IsNullRandomWay ==false && (MissWoundedKilled == 'w' || MissWoundedKilled == 'm'))
         {
             if (MissWoundedKilled == 'w')
             {
-                
+                if (pl.LastShootWay == 0)
+                {
+                    pl.RandomWay[2] =pl.RandomWay[3]= null;
+                }
+                else if (pl.LastShootWay == 1)
+                {
+                    pl.RandomWay[2] = pl.RandomWay[3] = null;
+                }
+                else if (pl.LastShootWay == 2)
+                {
+                    pl.RandomWay[0] = pl.RandomWay[1] = null;
+                }
+                else if (pl.LastShootWay == 3)
+                {
+                    pl.RandomWay[0] = pl.RandomWay[1] = null;
+                }
             }
             if (MissWoundedKilled == 'm')
             {
-
+                if (pl.LastShootWay == 0)
+                {
+                    pl.RandomWay[0] = null;
+                }
+                else if (pl.LastShootWay == 1)
+                {
+                    pl.RandomWay[1] = null;
+                }
+                else if (pl.LastShootWay == 2)
+                {
+                    pl.RandomWay[2] = null;
+                }
+                else if (pl.LastShootWay == 3)
+                {
+                    pl.RandomWay[3] = null;
+                }
             }
         }
 
@@ -477,7 +450,8 @@ class Player : BattleShip
     {
         x = -5;
         y = -5;
-        if (pl.EmenyPointShip == null)
+        Console.WriteLine("pl.RandomWay:" + pl.RandomWay);
+        if (pl.IsNullRandomWay == true)
         {
             int[][] availablepointmapplayer;
             availablepointmapplayer = this.AvailablePointToShootEnemy(pl_enemy);
@@ -491,16 +465,79 @@ class Player : BattleShip
             y = point[0];
             x = point[1];
         }
-        else if (pl.EmenyPointShip != null)
+        else if (pl.IsNullRandomWay == false)
         {
-            int random;
-            int?[][] ArrPoint;
-            Random rnd = new Random();
+            for (;;)
+            {
+                int random;
+                int Way;
 
-            random = rnd.Next(pl.EmenyPointShip.GetLength(0));
-            ArrPoint = pl.EmenyPointShip[random];
-            x =(int) ArrPoint[0][1];
-            y = (int) ArrPoint[0][0];
+                int[] random_array = new int[0];
+                for (int i = 0; i <= 3; i++)
+                {
+                    if (pl.RandomWay[i] != null)
+                    {
+                        Array.Resize(ref random_array, random_array.Length + 1);
+                        random_array[random_array.Length - 1] = i;
+                    }
+
+                }
+                Random rnd = new Random();
+                Console.WriteLine("random_array.Length:" + random_array.Length);
+                random = rnd.Next(random_array.Length);
+                Way = random_array[random];
+                pl.LastShootWay = Way;
+                if (Way == 0) //x+
+                {
+                    if (pl.LastShootPoint[1] + (int) pl.RandomWay[0] <= 9)
+                    {
+                        x = pl.LastShootPoint[1] + (int) pl.RandomWay[0];
+                        y = pl.LastShootPoint[0];
+                        pl.RandomWay[0]++;
+                        break;
+                    }
+                    else
+                        pl.RandomWay[0] = null;
+                }
+                else if (Way == 1) //x-
+                {
+                    if (pl.LastShootPoint[1] - (int)pl.RandomWay[1] >=0)
+                    {
+                        x = pl.LastShootPoint[1] - (int)pl.RandomWay[1];
+                        y = pl.LastShootPoint[0];
+                        pl.RandomWay[1]++;
+                        break;
+                    }
+                    else
+                        pl.RandomWay[1] = null;
+                }
+                else if (Way == 2) //y+
+                {
+                    if (pl.LastShootPoint[0] + (int)pl.RandomWay[2] <= 9)
+                    {
+                        x = pl.LastShootPoint[1];
+                        y = pl.LastShootPoint[0] + (int) pl.RandomWay[2];
+                        pl.RandomWay[2]++;
+                        break;
+                    }
+                    else
+                        pl.RandomWay[2] = null;
+                }
+                else if (Way == 3) //y-
+                {
+                    if (pl.LastShootPoint[0] + (int)pl.RandomWay[3] <=0)
+                    {
+                        x = pl.LastShootPoint[1];
+                        y = pl.LastShootPoint[0] + (int)pl.RandomWay[3];
+                        pl.RandomWay[3]++;
+                        break;
+                    }
+                    else
+                        pl.RandomWay[3] = null;
+                }
+            }
+            
+
         }
        
         

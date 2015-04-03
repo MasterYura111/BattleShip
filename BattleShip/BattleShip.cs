@@ -236,21 +236,21 @@
             {
                 if (finish)
                     break;
-                if (!start)
-                {
-                    if (pl == pl1)
-                    {
-                        pl = pl2;
-                        en = pl1;
+                //if (!start)
+                //{
+                //    if (pl == pl1)
+                //    {
+                //        pl = pl2;
+                //        en = pl1;
                         
-                    }
-                    else if (pl == pl2)
-                    {
-                        pl = pl1;
-                        en = pl2;
+                //    }
+                //    else if (pl == pl2)
+                //    {
+                //        pl = pl1;
+                //        en = pl2;
                         
-                    }
-                }
+                //    }
+                //}
                 for (;;)
                 {
                     //Display
