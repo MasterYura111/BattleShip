@@ -12,7 +12,7 @@ class Player : BattleShip
     private int[] availablepointmapplayer;
     public char LastMissWoundedKilled;
 
-    public Player(int u_id)
+    protected Player(int u_id)
     {
         user_id = u_id;
         mapplayer = new char[10, 10];
@@ -28,7 +28,7 @@ class Player : BattleShip
     {
         Console.WriteLine("User: " + username + " (" + user_id + ")");
     }
-    protected void ReadCoordinates(out int x, out int y)
+    private void ReadCoordinates(out int x, out int y)
     {
         string readline;
         for (; ; )
@@ -80,7 +80,7 @@ class Player : BattleShip
         else
             return false;
     }
-    protected bool CheckingTwoPoint(int first_x, int first_y, int second_x, int second_y, int length_ship, out string ansvererror)
+    private bool CheckingTwoPoint(int first_x, int first_y, int second_x, int second_y, int length_ship, out string ansvererror)
     {
         ansvererror = "";
         bool one_point = false;
@@ -141,13 +141,13 @@ class Player : BattleShip
         else
             return false;
     }
-    protected void InstalShipTwoPoints(int first_x, int first_y, int second_x, int second_y)
+    private void InstalShipTwoPoints(int first_x, int first_y, int second_x, int second_y)
     {
         for (int i = Math.Min(first_x, second_x); i <= Math.Max(first_x, second_x); i++)
             for (int j = Math.Min(first_y, second_y); j <= Math.Max(first_y, second_y); j++)
                 mapplayer[j, i] = '1';
     }
-    protected void BlockingAdjacentPoints(int first_x, int first_y, int second_x, int second_y)
+    private void BlockingAdjacentPoints(int first_x, int first_y, int second_x, int second_y)
     {
         for (int i = Math.Min(first_x, second_x) - 1; i <= Math.Max(first_x, second_x) + 1; i++)
             for (int j = Math.Min(first_y, second_y) - 1; j <= Math.Max(first_y, second_y) + 1; j++)
@@ -236,7 +236,7 @@ class Player : BattleShip
             }
         }
     }
-    protected void CreateFirstPointInitMap(int UserOrComputer, out int first_x, out int first_y, bool ShowProcess)
+    private void CreateFirstPointInitMap(int UserOrComputer, out int first_x, out int first_y, bool ShowProcess)
     {
         first_x = -5;
         first_y = -5;
@@ -252,7 +252,7 @@ class Player : BattleShip
             System.Threading.Thread.Sleep(300);
         }
     }
-    protected bool CreateSecondPointInitMap(int UserOrComputer, int first_x, int first_y, int length_ship, out int second_x, out int second_y, bool ShowProcess)
+    private bool CreateSecondPointInitMap(int UserOrComputer, int first_x, int first_y, int length_ship, out int second_x, out int second_y, bool ShowProcess)
     {
         second_x = -5;
         second_y = -5;
@@ -596,7 +596,7 @@ class Player : BattleShip
             }
         return availablepointmapplayer;
     }
-    public bool? PlayerShootToEnemy(int x, int y, Player pl_enemy, out char MissWoundedKilled)
+    private bool? PlayerShootToEnemy(int x, int y, Player pl_enemy, out char MissWoundedKilled)
     {
         MissWoundedKilled = '0';
         int[][] NeighboringPoints;

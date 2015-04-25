@@ -23,7 +23,7 @@
             create_fleet[3] = 2;
             create_fleet[4] = 1;
         }
-        public void InitMode()
+        protected void InitMode()
         {
             string readline;
 
@@ -299,6 +299,7 @@
             }
             return true;
         }
+
     }
 
 interface IPlayer
