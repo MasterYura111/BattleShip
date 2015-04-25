@@ -273,9 +273,9 @@
                     {
                         break;
                     }
+                    Console.WriteLine("****************************************");
                 }
                 start = false;
-
             }
 
             Console.Clear();

@@ -358,6 +358,10 @@ class Player : BattleShip
         {
             if(IsHumen)
                 this.ReadCoordinates(out x, out y);
+            //else if (pl.IsNullRandomWay)
+            //{
+            //    this.ReadCoordinates(out x, out y);
+            //}
             else
             {
                 this.RandomPointsToShootEnemy(out x, out y,pl,pl_enemy);
@@ -389,7 +393,7 @@ class Player : BattleShip
     private void MindCmputerShoot(int x, int y,Player pl, char MissWoundedKilled)
     {
 
-        if (pl.IsNullRandomWay == true && (MissWoundedKilled == 'k' || MissWoundedKilled == 'w'))
+        if (pl.IsNullRandomWay == true && MissWoundedKilled == 'w')
         {
             pl.RandomWay = new int?[] {1, 1, 1, 1};
             pl.LastShootPoint = new[] { y, x };
@@ -450,7 +454,7 @@ class Player : BattleShip
     {
         x = -5;
         y = -5;
-        Console.WriteLine("pl.RandomWay:" + pl.RandomWay);
+        //Console.WriteLine("pl.RandomWay:" + pl.RandomWay);
         if (pl.IsNullRandomWay == true)
         {
             int[][] availablepointmapplayer;
@@ -487,14 +491,20 @@ class Player : BattleShip
                 random = rnd.Next(random_array.Length);
                 Way = random_array[random];
                 pl.LastShootWay = Way;
+
                 if (Way == 0) //x+
                 {
-                    if (pl.LastShootPoint[1] + (int) pl.RandomWay[0] <= 9)
+                    if (pl.LastShootPoint[1] + (int) pl.RandomWay[0] <= 9 )
                     {
                         x = pl.LastShootPoint[1] + (int) pl.RandomWay[0];
                         y = pl.LastShootPoint[0];
-                        pl.RandomWay[0]++;
-                        break;
+                        if (pl_enemy.mapplayer[y, x] == 'e' || pl_enemy.mapplayer[y, x] == 'm')
+                            pl.RandomWay[0] = null;
+                        else
+                        {
+                            pl.RandomWay[0]++;
+                            break;    
+                        }
                     }
                     else
                         pl.RandomWay[0] = null;
@@ -505,8 +515,13 @@ class Player : BattleShip
                     {
                         x = pl.LastShootPoint[1] - (int)pl.RandomWay[1];
                         y = pl.LastShootPoint[0];
-                        pl.RandomWay[1]++;
-                        break;
+                        if (pl_enemy.mapplayer[y, x] == 'e' || pl_enemy.mapplayer[y, x] == 'm')
+                            pl.RandomWay[1] = null;
+                        else
+                        {
+                            pl.RandomWay[1]++;
+                            break;
+                        }
                     }
                     else
                         pl.RandomWay[1] = null;
@@ -517,20 +532,30 @@ class Player : BattleShip
                     {
                         x = pl.LastShootPoint[1];
                         y = pl.LastShootPoint[0] + (int) pl.RandomWay[2];
-                        pl.RandomWay[2]++;
-                        break;
+                        if (pl_enemy.mapplayer[y, x] == 'e' || pl_enemy.mapplayer[y, x] == 'm')
+                            pl.RandomWay[2] = null;
+                        else
+                        {
+                            pl.RandomWay[2]++;
+                            break;
+                        }
                     }
                     else
                         pl.RandomWay[2] = null;
                 }
                 else if (Way == 3) //y-
                 {
-                    if (pl.LastShootPoint[0] + (int)pl.RandomWay[3] <=0)
+                    if (pl.LastShootPoint[0] - (int)pl.RandomWay[3] >=0)
                     {
                         x = pl.LastShootPoint[1];
-                        y = pl.LastShootPoint[0] + (int)pl.RandomWay[3];
-                        pl.RandomWay[3]++;
-                        break;
+                        y = pl.LastShootPoint[0] - (int)pl.RandomWay[3];
+                        if (pl_enemy.mapplayer[y, x] == 'e' || pl_enemy.mapplayer[y, x] == 'm')
+                            pl.RandomWay[3] = null;
+                        else
+                        {
+                            pl.RandomWay[3]++;
+                            break;
+                        }
                     }
                     else
                         pl.RandomWay[3] = null;
@@ -675,6 +700,7 @@ class Player : BattleShip
                 }
                 else
                 {
+                    MissWoundedKilled = 'k';
                     this.SetEmptyCharNeighboringPoints(x, y, pl_enemy);
                 }
             }
