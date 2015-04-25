@@ -46,11 +46,7 @@ class Humen : Player,IPlayer
             {
                 Console.WriteLine("Incorrect. Enter y if manually, n if random)");
             }
-               
         }
-
-
-
         this.InitMap(ManuallOrRandom,true);
     }
 }

@@ -13,7 +13,6 @@ class Computer : Player,IPlayer
         if (this.mode == 1)
             ShowProcess = false;
 
-
         this.InitMapPlayer(ShowProcess);
     }
     public void InitUserName()
@@ -26,8 +25,4 @@ class Computer : Player,IPlayer
         this.InitMap(2, ShowProcess);
     }
 
-   
-    
-
-    
 }

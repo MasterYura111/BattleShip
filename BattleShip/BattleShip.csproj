@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BattleShip.cs" />
+    <Compile Include="ExampleDemoBS.cs" />
     <Compile Include="Computer.cs" />
     <Compile Include="Humen.cs" />
     <Compile Include="Player.cs" />

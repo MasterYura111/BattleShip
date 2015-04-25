@@ -2,37 +2,32 @@
 using System.Runtime.CompilerServices;
 
 
-class BattleShipDemo
+class MainBattleShip:BattleShip
 {
-    private static void Main()
+    public  MainBattleShip()
     {
-        var bt=new BattleShip();
-
-        bt.InitMode();
-
-        if (bt.mode == 1)
+        this.InitMode();
+        Player pl1;
+        Player pl2;
+        if (this.mode == 1)
         {
-            var hm = new Humen(1, bt.mode);
-            var cp = new Computer(2, bt.mode);
-
-            bt.InitOngoingGame(hm, cp);
-            
+              pl1 = new Humen(1, this.mode);
+              pl2 = new Computer(2, this.mode);
+              this.InitOngoingGame(pl1, pl2);
         }
 
-        if (bt.mode == 2)
+        if (this.mode == 2)
         {
-            var hm = new Humen(1, bt.mode);
-            var hm2 = new Humen(2, bt.mode);
-
-            bt.InitOngoingGame(hm, hm2);
+             pl1 = new Humen(1, this.mode);
+             pl2 = new Humen(2, this.mode);
+             this.InitOngoingGame(pl1, pl2);
         }
 
-        if (bt.mode == 3)
+        if (this.mode == 3)
         {
-           var cp = new Computer(1, bt.mode);
-           var cp2 = new Computer(2, bt.mode);
-
-           bt.InitOngoingGame(cp, cp2);
+             pl1 = new Computer(1, this.mode);
+             pl2 = new Computer(2, this.mode);
+             this.InitOngoingGame(pl1, pl2);
         }
     }
 }

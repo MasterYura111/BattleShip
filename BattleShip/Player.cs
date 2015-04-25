@@ -4,7 +4,6 @@ class Player : BattleShip
 {
     protected string username;
     public char[,] mapplayer;
-
     public int?[] RandomWay;
     public bool IsNullRandomWay=true;
     public int[] LastShootPoint;
@@ -12,6 +11,7 @@ class Player : BattleShip
     public int user_id;
     private int[] availablepointmapplayer;
     public char LastMissWoundedKilled;
+
     public Player(int u_id)
     {
         user_id = u_id;
@@ -23,17 +23,13 @@ class Player : BattleShip
         availablepointmapplayer = new int[100];
         for (int i = 0; i < 100; i++)
             availablepointmapplayer[i] = i;
-
     }
-
     public void ShowUserName()
     {
         Console.WriteLine("User: " + username + " (" + user_id + ")");
     }
-
     protected void ReadCoordinates(out int x, out int y)
     {
-
         string readline;
         for (; ; )
         {
@@ -112,7 +108,6 @@ class Player : BattleShip
                     ansvererror = "point on the map is not available or blocked point: " + i + "," + first_x + "";
                     return false;
                 }
-
             }
             return true;
         }
@@ -145,7 +140,6 @@ class Player : BattleShip
         }
         else
             return false;
-
     }
     protected void InstalShipTwoPoints(int first_x, int first_y, int second_x, int second_y)
     {
@@ -163,7 +157,6 @@ class Player : BattleShip
                         mapplayer[j, i] = 'b';
             }
     }
-
     protected void InitMap(int UserOrComputer, bool ShowProcess)
     {
         int first_x;
@@ -189,11 +182,9 @@ class Player : BattleShip
                     this.ShowMode();
                     this.ShowUserName();
                     Console.WriteLine("step: Create map user");
-                    this.DisplayMap(mapplayer, 1);
+                    this.DisplayMap(mapplayer);
                 }
                 
-                
-
                 for (; ; )
                 {
                     if (i != 1)
@@ -216,14 +207,12 @@ class Player : BattleShip
                             //first point in deadlock
                             PointInDeadlock = true;
                         }
-                        
                     }
                     else
                     {
                         second_x = first_x;
                         second_y = first_y;
                     }
-
 
                     if (!PointInDeadlock & this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out ansvererror))
                     {
@@ -242,16 +231,11 @@ class Player : BattleShip
                             Console.WriteLine("Error:Point In Deadlock. cancel first point. Try again.\n\tfor exit: exit");
                             PointInDeadlock = false;
                         }
-                            
-                        
                     }
-                        
-
                 }
             }
         }
     }
-
     protected void CreateFirstPointInitMap(int UserOrComputer, out int first_x, out int first_y, bool ShowProcess)
     {
         first_x = -5;
@@ -265,10 +249,9 @@ class Player : BattleShip
             this.RandomPoints(out first_x, out first_y);
             if (ShowProcess)
                 Console.WriteLine("random point: " + this.horizontal_axis[first_x] + first_y);
-            System.Threading.Thread.Sleep(100);
+            System.Threading.Thread.Sleep(300);
         }
     }
-
     protected bool CreateSecondPointInitMap(int UserOrComputer, int first_x, int first_y, int length_ship, out int second_x, out int second_y, bool ShowProcess)
     {
         second_x = -5;
@@ -286,13 +269,12 @@ class Player : BattleShip
             }
             if (ShowProcess)
                 Console.WriteLine("random point: " + this.horizontal_axis[second_x] + second_y);
+            System.Threading.Thread.Sleep(300);
             return true;
-            System.Threading.Thread.Sleep(100);
         }
         return true;
     }
-
-    private bool RandomPoints(out int x, out int y)
+    private void RandomPoints(out int x, out int y)
     {
         int random;
         string randomcoordinates;
@@ -302,8 +284,6 @@ class Player : BattleShip
         randomcoordinates = availablepointmapplayer[random].ToString("D2");
         y = Convert.ToInt32(randomcoordinates[0].ToString());
         x = Convert.ToInt32(randomcoordinates[1].ToString());
-        return true;
-
     }
     private bool RandomSecondPoint(int first_x, int first_y, int length_ship, out int x, out int y)
     {
@@ -358,7 +338,6 @@ class Player : BattleShip
         {
             return false;
         }
-
     }
     private void UpdateAvailablePoint()
     {
@@ -378,17 +357,13 @@ class Player : BattleShip
 
                     this.availablepointmapplayer[this.availablepointmapplayer.Length - 1] = new_yx;
                 }
-
             }
     }
-
-
     public bool InitPlayerShootToEnemy(Player pl, Player pl_enemy, out char MissWoundedKilled, bool ShowProcess)
     {
         bool IsHumen = false;
         if (pl is Humen)
             IsHumen = true;
-
         
         int x, y;
         bool? res;
@@ -433,12 +408,8 @@ class Player : BattleShip
         if (res == true)
             return true;
         else
-        {
             return false;
-        }
-
     }
-
     private void MindCmputerShoot(int x, int y,Player pl, char MissWoundedKilled)
     {
 
@@ -495,10 +466,7 @@ class Player : BattleShip
                 }
             }
         }
-
-            
     }
-
     private void RandomPointsToShootEnemy(out int x, out int y,Player pl, Player pl_enemy)
     {
         x = -5;
@@ -508,7 +476,6 @@ class Player : BattleShip
         {
             int[][] availablepointmapplayer;
             availablepointmapplayer = this.AvailablePointToShootEnemy(pl_enemy);
-
 
             int[] point;
             int random;
@@ -533,7 +500,6 @@ class Player : BattleShip
                         Array.Resize(ref random_array, random_array.Length + 1);
                         random_array[random_array.Length - 1] = i;
                     }
-
                 }
                 Random rnd = new Random();
                 //Console.WriteLine("random_array.Length:" + random_array.Length);
@@ -610,11 +576,7 @@ class Player : BattleShip
                         pl.RandomWay[3] = null;
                 }
             }
-            
-
         }
-       
-        
     }
     private int[][] AvailablePointToShootEnemy(Player pl_enemy)
     {
@@ -634,8 +596,6 @@ class Player : BattleShip
             }
         return availablepointmapplayer;
     }
-
-
     public bool? PlayerShootToEnemy(int x, int y, Player pl_enemy, out char MissWoundedKilled)
     {
         MissWoundedKilled = '0';
@@ -695,7 +655,6 @@ class Player : BattleShip
                                 EventPlus = false;
                         }
 
-
                         for (;;)
                         {
                             if (variable > 9 || variable < 0)
@@ -703,7 +662,6 @@ class Player : BattleShip
                                 MarkSetEmpty = true;
                                 break;
                             }
-
 
                             if (pl_enemy.mapplayer[pointCoord[0], pointCoord[1]] == 'k')
                             {
@@ -733,7 +691,6 @@ class Player : BattleShip
                                 pointCoord = new[] {y, variable};
                             else if (y != Neighboring_y)
                                 pointCoord = new[] {variable, x};
-
                         }
                     }
 
@@ -757,9 +714,7 @@ class Player : BattleShip
         }
         else
             return null;
-       
     }
-
     private void SetEmptyCharNeighboringPoints(int x, int y, Player pl_enemy)
     {
         for (int i =x - 1; i <= x + 1; i++)
