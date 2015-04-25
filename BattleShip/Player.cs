@@ -9,8 +9,9 @@ class Player : BattleShip
     public bool IsNullRandomWay=true;
     public int[] LastShootPoint;
     public int LastShootWay;
-    protected int user_id;
+    public int user_id;
     private int[] availablepointmapplayer;
+    public char LastMissWoundedKilled;
     public Player(int u_id)
     {
         user_id = u_id;
@@ -163,7 +164,7 @@ class Player : BattleShip
             }
     }
 
-    protected void InitMap(int UserOrComputer)
+    protected void InitMap(int UserOrComputer, bool ShowProcess)
     {
         int first_x;
         int first_y;
@@ -171,16 +172,27 @@ class Player : BattleShip
         int second_y;
         string ansvererror;
         string text_first = "";
-
+        bool PointInDeadlock = false;
+        if (!ShowProcess)
+        {
+            Console.Clear();
+            Console.WriteLine("loading create map computer");
+        }
+            
         for (int i = 4; i >= 1; i--)
         {
             for (int j = 1; j <= this.create_fleet[i]; j++)
             {
-                Console.Clear();
-                this.ShowMode();
-                this.ShowUserName();
-                Console.WriteLine("step: Create map user");
-                this.DisplayMap(mapplayer,1);
+                if (ShowProcess)
+                {
+                    Console.Clear();
+                    this.ShowMode();
+                    this.ShowUserName();
+                    Console.WriteLine("step: Create map user");
+                    this.DisplayMap(mapplayer, 1);
+                }
+                
+                
 
                 for (; ; )
                 {
@@ -188,14 +200,22 @@ class Player : BattleShip
                         text_first = "first";
                     else
                         text_first = "";
-                    Console.WriteLine("enter " + text_first + " point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+                    if (ShowProcess)
+                        Console.WriteLine("enter " + text_first + " point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
 
-                    this.CreateFirstPointInitMap(UserOrComputer, out first_x, out first_y);
+                    this.CreateFirstPointInitMap(UserOrComputer, out first_x, out first_y, ShowProcess);
 
                     if (i != 1)
                     {
-                        Console.WriteLine("enter second point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
-                        this.CreateSecondPointInitMap(UserOrComputer,first_x,first_y,i, out second_x, out second_y);
+                        if (ShowProcess)
+                            Console.WriteLine("enter second point coordinates {0}x ship, count:{1}/{2}", i, j, create_fleet[i]);
+
+                        if (!this.CreateSecondPointInitMap(UserOrComputer, first_x, first_y, i, out second_x,
+                            out second_y, ShowProcess))
+                        {
+                            //first point in deadlock
+                            PointInDeadlock = true;
+                        }
                         
                     }
                     else
@@ -205,23 +225,34 @@ class Player : BattleShip
                     }
 
 
-                    if (this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out  ansvererror))
+                    if (!PointInDeadlock & this.CheckingTwoPoint(first_x, first_y, second_x, second_y, i, out ansvererror))
                     {
                         this.InstalShipTwoPoints(first_x, first_y, second_x, second_y);
                         this.BlockingAdjacentPoints(first_x, first_y, second_x, second_y);
-                        if(UserOrComputer==2)
+                        if (UserOrComputer == 2)
                             this.UpdateAvailablePoint();
                         break;
                     }
                     else
-                        Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
+                    {
+                        if (!PointInDeadlock & ShowProcess)
+                            Console.WriteLine("Error:'" + ansvererror + "'. Try again.\n\tfor exit: exit");
+                        else if (PointInDeadlock)
+                        {
+                            Console.WriteLine("Error:Point In Deadlock. cancel first point. Try again.\n\tfor exit: exit");
+                            PointInDeadlock = false;
+                        }
+                            
+                        
+                    }
+                        
 
                 }
             }
         }
     }
 
-    protected void CreateFirstPointInitMap(int UserOrComputer, out int first_x, out int first_y)
+    protected void CreateFirstPointInitMap(int UserOrComputer, out int first_x, out int first_y, bool ShowProcess)
     {
         first_x = -5;
         first_y = -5;
@@ -232,25 +263,33 @@ class Player : BattleShip
         else if (UserOrComputer == 2)
         {
             this.RandomPoints(out first_x, out first_y);
-            Console.WriteLine("random point: " + this.horizontal_axis[first_x] + first_y);
-            System.Threading.Thread.Sleep(10);
+            if (ShowProcess)
+                Console.WriteLine("random point: " + this.horizontal_axis[first_x] + first_y);
+            System.Threading.Thread.Sleep(100);
         }
     }
 
-    protected void CreateSecondPointInitMap(int UserOrComputer,int first_x,int first_y, int length_ship,out int second_x, out int second_y)
+    protected bool CreateSecondPointInitMap(int UserOrComputer, int first_x, int first_y, int length_ship, out int second_x, out int second_y, bool ShowProcess)
     {
         second_x = -5;
         second_y = -5;
         if (UserOrComputer == 1)
         {
             this.ReadCoordinates(out second_x, out second_y);
+            return true;
         }
         else if (UserOrComputer == 2)
         {
-            this.RandomSecondPoint(first_x, first_y, length_ship, out second_x, out second_y);
-            Console.WriteLine("random point: " + this.horizontal_axis[second_x] + second_y);
-            System.Threading.Thread.Sleep(10);
+            if(!this.RandomSecondPoint(first_x, first_y, length_ship, out second_x, out second_y))
+            {
+                return false;
+            }
+            if (ShowProcess)
+                Console.WriteLine("random point: " + this.horizontal_axis[second_x] + second_y);
+            return true;
+            System.Threading.Thread.Sleep(100);
         }
+        return true;
     }
 
     private bool RandomPoints(out int x, out int y)
@@ -344,29 +383,35 @@ class Player : BattleShip
     }
 
 
-    public bool InitPlayerShootToEnemy(Player pl, Player pl_enemy, out char MissWoundedKilled)
+    public bool InitPlayerShootToEnemy(Player pl, Player pl_enemy, out char MissWoundedKilled, bool ShowProcess)
     {
         bool IsHumen = false;
         if (pl is Humen)
             IsHumen = true;
 
-        Console.WriteLine("IsHumen: " + IsHumen);
+        
         int x, y;
         bool? res;
-        Console.WriteLine("enter point coordinates shoot to enemy");
+        if (ShowProcess)
+        {
+            if(pl.LastMissWoundedKilled=='m')
+                Console.WriteLine("You are miss");
+            if (pl.LastMissWoundedKilled == 'w')
+                Console.WriteLine("You are wounded");
+            if (pl.LastMissWoundedKilled == 'k')
+                Console.WriteLine("You are killed");
+            Console.WriteLine("enter point coordinates shoot to enemy");
+        }
+            
         for (;;)
         {
             if(IsHumen)
                 this.ReadCoordinates(out x, out y);
-            //else if (pl.IsNullRandomWay)
-            //{
-            //    this.ReadCoordinates(out x, out y);
-            //}
             else
             {
                 this.RandomPointsToShootEnemy(out x, out y,pl,pl_enemy);
-                Console.WriteLine("Random point: "+y+this.horizontal_axis[x]);
-                System.Threading.Thread.Sleep(1000);
+                if (ShowProcess)
+                    Console.WriteLine("Random point: "+y+this.horizontal_axis[x]);
             }
             res = this.PlayerShootToEnemy(x, y, pl_enemy, out MissWoundedKilled);
             if (!IsHumen)
@@ -374,12 +419,16 @@ class Player : BattleShip
                 //mind computer shoot
                 this.MindCmputerShoot(x, y,pl, MissWoundedKilled);
             }
-            
+            pl.LastMissWoundedKilled = MissWoundedKilled;
 
-            if(res!=null)
+            if (res != null)
                 break;
             else
-                Console.WriteLine("wrong coordinates. Point already shoot. Try again\n\tfor exit: exit");
+            {
+                if(ShowProcess)
+                    Console.WriteLine("wrong coordinates. Point already shoot. Try again\n\tfor exit: exit");
+            }
+                
         }
         if (res == true)
             return true;
@@ -487,7 +536,7 @@ class Player : BattleShip
 
                 }
                 Random rnd = new Random();
-                Console.WriteLine("random_array.Length:" + random_array.Length);
+                //Console.WriteLine("random_array.Length:" + random_array.Length);
                 random = rnd.Next(random_array.Length);
                 Way = random_array[random];
                 pl.LastShootWay = Way;

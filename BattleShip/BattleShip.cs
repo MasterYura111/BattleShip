@@ -95,7 +95,7 @@
             {
                 if (ch == '0') return " ";
                 else if (ch == 'b') return " ";
-                else if (ch == '1') return "X";
+                else if (ch == '1') return " ";
                 else if (ch == 'm') return "M";
                 else if (ch == 'k') return "K";
                 else if (ch == 'e') return "e";
@@ -219,7 +219,7 @@
         }
         protected void ShowMode()
         {
-            Console.WriteLine("Mode: " + modename[mode] + "mode: " + mode);
+            Console.WriteLine("Mode: " + modename[mode] );
         }
 
         public void InitOngoingGame(Player pl1, Player pl2)
@@ -227,6 +227,7 @@
             Player pl;
             Player en;
             bool finish = false;
+            bool ShowProcess = true;
             char MissWoundedKilled;
 
             pl = pl1;
@@ -236,32 +237,55 @@
             {
                 if (finish)
                     break;
-                //if (!start)
-                //{
-                //    if (pl == pl1)
-                //    {
-                //        pl = pl2;
-                //        en = pl1;
-                        
-                //    }
-                //    else if (pl == pl2)
-                //    {
-                //        pl = pl1;
-                //        en = pl2;
-                        
-                //    }
-                //}
+                if (!start)
+                {
+                    if (pl == pl1)
+                    {
+                        pl = pl2;
+                        en = pl1;
+
+                    }
+                    else if (pl == pl2)
+                    {
+                        pl = pl1;
+                        en = pl2;
+
+                    }
+                }
                 for (;;)
                 {
-                    //Display
+                    if (pl.mode == 1 && pl is Humen)
+                        ShowProcess = true;
+                    else if (pl.mode == 2 )
+                        ShowProcess = true;
+                    else if (pl.mode == 3)
+                    {
+                        if(pl.user_id==1)
+                            ShowProcess = true;
+                        else
+                            ShowProcess = false;
+                    }
+                    else
+                        ShowProcess = false;
+
+                    
                     Console.Clear();
-                    pl.ShowMode();
-                    pl.ShowUserName();
-                    Console.WriteLine("step: Play");
 
-                    pl1.DisplayTwoMapOneRow(pl.mapplayer, en.mapplayer);
+                    if (ShowProcess)
+                    {
+                        pl.ShowMode();
+                        pl.ShowUserName();
+                        Console.WriteLine("step: Play");
+                        pl1.DisplayTwoMapOneRow(pl.mapplayer, en.mapplayer);
+                        
+                    }
+                    //Display
 
-                    if (pl.InitPlayerShootToEnemy(pl, en, out MissWoundedKilled))
+
+
+
+
+                    if (pl.InitPlayerShootToEnemy(pl, en, out MissWoundedKilled, ShowProcess))
                     {
                         if (this.EnemyIsDead(en))
                         {
@@ -273,12 +297,19 @@
                     {
                         break;
                     }
-                    Console.WriteLine("****************************************");
+                    
                 }
+                if (ShowProcess)
+                    System.Threading.Thread.Sleep(500);
                 start = false;
             }
 
             Console.Clear();
+            if (pl is Computer)
+            {
+                pl = pl1;
+                en = pl2;
+            }
             pl.ShowMode();
             pl.ShowUserName();
             Console.WriteLine("step: Finish");
@@ -286,7 +317,7 @@
             Console.WriteLine();
             Console.WriteLine("Victory.Congratulations");
             pl.ShowUserName();
-
+            
 
 
         }
@@ -308,6 +339,6 @@
 
 interface IPlayer
 {
-    void InitMapPlayer();
+    void InitMapPlayer(bool ShowProcess);
     void InitUserName();
 }
